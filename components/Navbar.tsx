@@ -5,8 +5,6 @@ import {
     MenubarContent,
     MenubarItem,
     MenubarMenu,
-    MenubarSeparator,
-    MenubarShortcut,
     MenubarTrigger,
 } from "@/components/ui/menubar"
 
@@ -14,7 +12,6 @@ import { Button } from "@/components/ui/button"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { GraduationCap } from "lucide-react"
-import { useRouter } from "next/router"
 
 
 export default function Navbar() {
