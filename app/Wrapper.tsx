@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const hideNav = pathname === "/sign-in" || pathname === "/sign-up" || pathname.startsWith("/todolist");
+  const hideNav = pathname === "/sign-in" || pathname === "/sign-up";
 
   return (
     <>

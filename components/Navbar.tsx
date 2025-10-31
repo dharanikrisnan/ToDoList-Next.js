@@ -8,10 +8,12 @@ import {
     MenubarTrigger,
 } from "@/components/ui/menubar"
 
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { GraduationCap } from "lucide-react"
+
 
 
 export default function Navbar() {
@@ -40,24 +42,28 @@ export default function Navbar() {
                     <MenubarMenu>
                         <MenubarTrigger className="text-black font-semibold">Explore</MenubarTrigger>
                         <MenubarContent>
-                            <MenubarItem>All Courses</MenubarItem>
+                            <MenubarItem asChild>
+                                <Link href="/course">All Courses</Link>
+                            </MenubarItem>
                             <MenubarItem>New Releases</MenubarItem>
                         </MenubarContent>
                     </MenubarMenu>
                     <MenubarMenu>
                         <MenubarTrigger className="text-black font-semibold">Courses</MenubarTrigger>
                         <MenubarContent>
-                            <MenubarItem>Web Development</MenubarItem>
+                            <MenubarItem asChild>
+                                <Link href="/webdevelopment">Web Development</Link>
+                            </MenubarItem>
                             <MenubarItem>Data Science</MenubarItem>
                         </MenubarContent>
                     </MenubarMenu>
                 </Menubar>
 
                 <div className="ml-auto flex gap-2">
-                    <Button className="bg-white border-2 border-purple-500 text-purple-900 hover:bg-purple-50" onClick={handleLogin}>
+                    <Button className="bg-white border-2 border-purple-500 text-purple-900 hover:bg-purple-500 hover:text-white " onClick={handleLogin}>
                         Login
                     </Button>
-                    <Button className="bg-white border-2 border-purple-500 text-purple-900 hover:bg-purple-50">
+                    <Button className="bg-white border-2 border-purple-500 text-purple-900 hover:bg-purple-500 hover:text-white">
                         Sign-Up
                     </Button>
                 </div>

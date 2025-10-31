@@ -6,13 +6,81 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import Lottie from "lottie-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
-export default function LoginContainer() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confimpass, setConfimpass] = useState("");
+
+const userSignUp = z.object({
+  name: z.string().min(6, "Name is Required"),
+  email: z.string().email("Enter a valid email"),
+  password: z.string().min(8, "Password must be at least 8 characters long")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[A-Z]/, "Password must contain at least one Uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number"),
+
+  confirmPassword: z.string().min(1, "Confirm Password is required"),
+})
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Password must match",
+    path: ["confirmPassword"],
+  });
+
+
+type SignUpForm = z.infer<typeof userSignUp>;
+
+async function submitSignUp(formData: SignUpForm): Promise<{ success: boolean; message: string }> {
+
+  const result = await fetch(`http://localhost:4000/users?email=${formData.email}`)
+  const data = await result.json()
+
+  if (data.length > 0) {
+    throw new Error("Email already registered");
+
+  }
+
+  await fetch(`http://localhost:4000/users`, {
+    method: "POST",
+    headers: { "Content-Type": "application /json" },
+    body: JSON.stringify(formData),
+  });
+  return {
+    success: true, message: "Account created successfully"
+
+  }
+}
+
+
+export default function SignUpContainer() {
+
   const [animationData, setAnimationData] = useState<any>(null);
+
+  const { register, handleSubmit, formState } = useForm<SignUpForm>({
+    resolver: zodResolver(userSignUp),
+    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
+  });
+
+  const router = useRouter();
+
+  const signUpMutation = useMutation({
+    mutationFn: submitSignUp,
+    onSuccess: (data) => {
+      toast.success(data.message);
+      router.push("/sign-in");
+    },
+    onError: (error: any) => {
+      const msg = error?.message ?? "sign-up failed";
+      toast.error(`Sign-Up Failed! Error: ${error.message}`);
+    },
+  });
+
+  const onSubmit = (data: SignUpForm) => {
+    signUpMutation.mutate(data);
+  };
+
 
   useEffect(() => {
     fetch("/lotties/login.json")
@@ -24,16 +92,23 @@ export default function LoginContainer() {
   return (
     <div className="flex h-screen w-full items-center justify-center bg-gray-100 p-4">
       <div className="flex bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] overflow-hidden max-w-5xl w-full">
-        
+
         <div className="w-1/2 p-10 flex flex-col justify-center">
           <h1 className="text-center text-3xl font-extrabold text-purple-800">
-            Welcome Back!
+            Create Account
           </h1>
           <p className="text-center text-gray-600 mt-2 text-sm">
             Please enter your credentials to access your account
           </p>
 
-          <form className="mt-8 space-y-5 flex flex-col items-center">
+          <form className="mt-8 space-y-5 flex flex-col items-center" onSubmit={handleSubmit(onSubmit)}>
+
+            {signUpMutation.isError && (
+              <p className="text-red-500 text-sm mt-1 text-center w-[85%]">
+                Error: {signUpMutation.error.message}
+              </p>
+            )}
+
             <div className="flex flex-col space-y-1 w-[85%]">
               <Label htmlFor="name" className="text-gray-700 text-sm font-medium">
                 Name
@@ -42,10 +117,12 @@ export default function LoginContainer() {
                 id="name"
                 type="text"
                 placeholder="Good name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                {...register("name")}
                 className="border-gray-300 focus:ring-2 focus:ring-gray-400 px-2 py-2 border text-sm"
               />
+              {formState.errors.name && (
+                <p className="text-red-500 text-sm mt-1">{formState.errors.name.message}</p>
+              )}
             </div>
 
             <div className="flex flex-col space-y-1 w-[85%]">
@@ -56,10 +133,12 @@ export default function LoginContainer() {
                 id="email"
                 type="email"
                 placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...register("email")}
                 className="border-gray-300 focus:ring-2 focus:ring-gray-400 px-2 py-2 border text-sm"
               />
+              {formState.errors.email && (
+                <p className="text-red-500 text-sm mt-1">{formState.errors.email.message}</p>
+              )}
             </div>
 
             <div className="flex flex-col space-y-1 w-[85%]">
@@ -70,10 +149,12 @@ export default function LoginContainer() {
                 id="password"
                 type="password"
                 placeholder="*********"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register("password")}
                 className="border-gray-300 focus:ring-2 focus:ring-gray-400 px-2 py-2 border text-sm"
               />
+              {formState.errors.password && (
+                <p className="text-red-500 text-sm mt-1">{formState.errors.password.message}</p>
+              )}
             </div>
 
             <div className="flex flex-col space-y-1 w-[85%]">
@@ -84,17 +165,20 @@ export default function LoginContainer() {
                 id="confirm-password"
                 type="password"
                 placeholder="*********"
-                value={confimpass}
-                onChange={(e) => setConfimpass(e.target.value)}
+                {...register("confirmPassword")}
                 className="border-gray-300 focus:ring-2 focus:ring-gray-400 px-2 py-2 border text-sm"
               />
+              {formState.errors.confirmPassword && (
+                <p className="text-red-500 text-sm mt-1">{formState.errors.confirmPassword.message}</p>
+              )}
             </div>
 
             <Button
               type="submit"
+              disabled={signUpMutation.isPending}
               className="w-50 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 transition-colors duration-200"
             >
-              Sign Up
+              {signUpMutation.isPending ? "Processing..." : "Sign Up"}
             </Button>
           </form>
 
