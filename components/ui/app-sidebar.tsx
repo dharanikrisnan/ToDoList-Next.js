@@ -10,13 +10,11 @@ import {
   GalleryVerticalEnd,
   Map,
   PieChart,
-  Settings2,
-  SquareTerminal,
+
 } from "lucide-react"
 
 import { NavMain } from "@/components/ui/nav-main"
 import { NavProjects } from "./nav-projects"
-// import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/ui/nav-user"
 import { TeamSwitcher } from "@/components/ui/team-switcher"
 import {

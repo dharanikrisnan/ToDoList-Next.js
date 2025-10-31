@@ -12,7 +12,7 @@ export default function Courses() {
         return result.json();
     };
 
-    const { isLoading, isError, data, error } = useQuery({
+    const { data  } = useQuery({
         queryKey: ["courses"],
         queryFn: fetchCourses,
     });
